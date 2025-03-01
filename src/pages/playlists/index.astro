@@ -1,17 +1,18 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Playlist from '../../components/Playlist.jsx';
+import Layout from '@/layouts/Layout.astro';
+import PlaylistFetcher from '@/react/PlaylistFetcher.jsx';
+import AsideMenu from '@/astro/aside/AsideMenu.astro';
 ---
 <Layout>
-  {/*<Playlist client:only="react" /> */}
+  <PlaylistFetcher client:only="react" />
   <div id="app" class="relative h-screen p-2 gap-2">
-    <aside class="[grid-area:aside] flex-col flex overflow-y-auto bg-blue-300">
-        ASIDE
+    <aside class="[grid-area:aside] flex-col flex overflow-y-auto">
+        <AsideMenu />
     </aside>
-    <main class="[grid-area:main] bg-blue-200">
+    <main class="[grid-area:main] rounded-lg bg-zinc-900 overflow-y-auto">
         MAIN
     </main>
-    <footer class="[grid-area:player] bg-blue-100">
+    <footer class="[grid-area:player] min-h-[100px]">
         PLAYER
     </footer>
   </div>

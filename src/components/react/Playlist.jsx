@@ -22,6 +22,7 @@ export default function Playlists() {
                 .then((response) => {
                     console.log("Playlists:", response.data.items);
                     setPlaylists(response.data.items);
+                    localStorage.setItem("playlists", JSON.stringify(response.data.items));
                     setLoading(false);
                 })
                 .catch((error) => {

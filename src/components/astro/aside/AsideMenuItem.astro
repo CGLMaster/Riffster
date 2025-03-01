@@ -1,0 +1,12 @@
+---
+interface AsideMenuItem {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<a href={href} class="flex gap-4 text-zinc-400 hover:text-zinc-100 items-center py-2 px-5 font-medium transition duration-300">
+    <slot />
+</a>
+
