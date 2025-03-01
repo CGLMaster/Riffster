@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import App from '../components/App.jsx';
+
+const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+const spotifyRedirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+const spotifyScopes = import.meta.env.VITE_SPOTIFY_SCOPES;
+---
+<Layout>
+  <App 
+    clientId={spotifyClientId}
+    clientSecret={spotifyClientSecret}
+    redirectUri={spotifyRedirectUri}
+    scopes={spotifyScopes}
+    client:only="react" 
+  />
+</Layout>

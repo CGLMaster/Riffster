@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Playlist from '../../components/Playlist.jsx';
+---
+<Layout>
+  {/*<Playlist client:only="react" /> */}
+  <div id="app" class="relative h-screen p-2 gap-2">
+    <aside class="[grid-area:aside] flex-col flex overflow-y-auto bg-blue-300">
+        ASIDE
+    </aside>
+    <main class="[grid-area:main] bg-blue-200">
+        MAIN
+    </main>
+    <footer class="[grid-area:player] bg-blue-100">
+        PLAYER
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  #app {
+    display: grid;
+    grid-template-areas:
+      "aside main main"
+      "player player player";
+    grid-template-columns: 350px 1fr;
+    grid-template-rows: 1fr auto;
+  }
+</style>
