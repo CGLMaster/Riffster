@@ -1,30 +1,8 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import PlaylistFetcher from '@/react/PlaylistFetcher.jsx';
-import AsideMenu from '@/astro/aside/AsideMenu.astro';
+import RiffsterLayout from '@/layouts/RiffsterLayout.astro';
+import MainContainer from '@/components/astro/main/index.astro';
 ---
-<Layout>
-  <PlaylistFetcher client:only="react" />
-  <div id="app" class="relative h-screen p-2 gap-2">
-    <aside class="[grid-area:aside] flex-col flex overflow-y-auto">
-        <AsideMenu />
-    </aside>
-    <main class="[grid-area:main] rounded-lg bg-zinc-900 overflow-y-auto">
-        MAIN
-    </main>
-    <footer class="[grid-area:player] min-h-[100px]">
-        PLAYER
-    </footer>
-  </div>
-</Layout>
+<RiffsterLayout>
+    <MainContainer />
+</RiffsterLayout>
 
-<style>
-  #app {
-    display: grid;
-    grid-template-areas:
-      "aside main main"
-      "player player player";
-    grid-template-columns: 350px 1fr;
-    grid-template-rows: 1fr auto;
-  }
-</style>

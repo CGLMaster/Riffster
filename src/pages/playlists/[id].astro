@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+import PlaylistDetails from '@/react/playlist/PlaylistDetails.jsx';
+import RiffsterLayout from '@/layouts/RiffsterLayout.astro';
+const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+
+const { id } = Astro.params;
+
+---
+
+<RiffsterLayout>
+    <PlaylistDetails id={id} spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret}  client:load/>
+</RiffsterLayout>

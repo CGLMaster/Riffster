@@ -1,5 +1,3 @@
-import React from 'react';
-
 function AsideMenuCard({ playlist }) {
   const { id, name, images, owner } = playlist;
   const { display_name } = owner;
@@ -7,15 +5,21 @@ function AsideMenuCard({ playlist }) {
   return (
     <a
       href={`/playlists/${id}`}
-      className="playlist-item flex relative p-2 overflow-hidden items-center gap-5 rounded-md hover:bg-zinc-800"
+      className="playlist-item flex relative p-2 overflow-hidden items-center gap-5 rounded-md hover:bg-zinc-800 group"
     >
-      <picture className="w-12 h-12">
+      <div className="relative w-12 h-12">
         <img
           src={images[0].url}
           alt={name}
           className="object-cover w-full h-full rounded-md"
         />
-      </picture>
+        <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md">
+          <iconify-icon
+            icon="solar:play-bold"
+            class="text-2xl text-white"
+          ></iconify-icon>
+        </div>
+      </div>
       <div className="flex flex-auto flex-col truncate">
         <h4>{name}</h4>
         <span className="text-sm text-gray-400">{display_name}</span>

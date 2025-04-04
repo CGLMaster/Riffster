@@ -1,36 +1,65 @@
 ---
 import AsideMenuItem from "./AsideMenuItem.astro";
-import AsideMenuCard from "./AsideMenuCard.astro";
-import ClientPlaylist from '@/react/ClientPlaylist.jsx'
+import ClientPlaylist from "@/components/react/aside/ClientPlaylist.jsx";
 import "iconify-icon";
 
 let playlists = [];
 ---
 
-<nav class="flex flex-col flex-1 gap-2">
-    <div class="bg-zinc-900 rounded-lg p-2">
-        <ul>
-            <AsideMenuItem href="#">
-                <iconify-icon
-                    icon="material-symbols:home-rounded"
-                    class="text-2xl"></iconify-icon>
-                {
-                    /*<iconify-icon icon="material-symbols:home-outline-rounded" class="text-2xl"/>*/
-                }
-                Inicio
-            </AsideMenuItem>
-            <AsideMenuItem href="#">
-                <iconify-icon icon="mingcute:search-line" class="text-2xl"
-                ></iconify-icon>
-                Buscar
-            </AsideMenuItem>
-        </ul>
-    </div>
-    <div class="bg-zinc-900 rounded-lg p-2 flex-1">
-        <AsideMenuItem href="#">
-            <iconify-icon icon="mdi:bookshelf" class="text-2xl"></iconify-icon>
-            Tu biblioteca
-        </AsideMenuItem>
-        <ClientPlaylist client:load />
-    </div>
+<nav class="flex flex-col flex-1 gap-2 overflow-y-hidden">
+  <div class="bg-zinc-900 rounded-lg p-2">
+    <ul>
+      <AsideMenuItem href="/playlists">
+        <iconify-icon icon="material-symbols:home-rounded" class="text-2xl"></iconify-icon>
+        Inicio
+      </AsideMenuItem>
+      <AsideMenuItem href="#">
+        <iconify-icon icon="mingcute:search-line" class="text-2xl"></iconify-icon>
+        Buscar
+      </AsideMenuItem>
+    </ul>
+  </div>
+  <div id="scrollableContainer" class="bg-zinc-900 rounded-lg p-2 flex-1 overflow-y-auto scrollable">
+    <AsideMenuItem href="#">
+      <iconify-icon icon="mdi:bookshelf" class="text-2xl"></iconify-icon>
+      Tu biblioteca
+    </AsideMenuItem>
+    <ClientPlaylist client:load />
+  </div>
 </nav>
+
+<style>
+  .scrollable::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scrollable::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 8px;
+  }
+  .scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(31, 41, 55, 0.5);
+    border-radius: 8px;
+    display: none;
+    transition: display 0.3s ease;
+  }
+  .scrollable.scrolling::-webkit-scrollbar-thumb {
+    display: block;
+  }
+  .scrollable::-webkit-scrollbar-button {
+    display: none;
+  }
+</style>
+
+<script>
+  const scrollable = document.getElementById('scrollableContainer');
+  let isScrolling;
+  
+  scrollable.addEventListener('scroll', () => {
+    clearTimeout(isScrolling);
+    scrollable.classList.add('scrolling');
+    
+    isScrolling = setTimeout(() => {
+      scrollable.classList.remove('scrolling');
+    }, 500);
+  });
+</script>
