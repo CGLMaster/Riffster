@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PlaylistList from "@/react/playlist/PlaylistList";
 import { refreshAccessToken } from "@/hooks/utils";
+import Loader from "@/react/playlist/Loader";
 
 export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecret}) {
   const [playlist, setPlaylist] = useState(null);
@@ -48,7 +49,9 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
           fetchAllTracks(data.next, newTracks);
         } else {
           setAllTracks(newTracks);
-          setIsLoading(false);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 2000);
         }
       } catch (err) {
         setError("Error de red: " + err.message);
@@ -76,7 +79,7 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
 
   if (error) return <div>Error: {error}</div>;
 
-  if (isLoading || !playlist) return <div>Cargando...</div>;
+  if (isLoading || !playlist) return <Loader />;
 
   const trackCount = allTracks.length;
 
@@ -86,6 +89,8 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
   const totalHours = Math.floor(totalMinutes / 60);
   const remainingMinutes = totalMinutes % 60;
 
+  const time = totalHours > 0 ? `${totalHours}h ${remainingMinutes}m` : `${totalMinutes}m`;
+  /*
   let time;
   if (totalHours >= 24) {
     time = "Más de 24h";
@@ -104,6 +109,7 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
   } else {
     time = `${totalMinutes} min ${totalSeconds % 60} seg`;
   }
+  */
 
   return (
     <div className="relative playlist-scroll h-full overflow-y-auto min-w-[570px]">
@@ -115,15 +121,14 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
             className="object-cover w-[23%] h-[23%] rounded-md shadow-xl shadow-black/40"
           />
           <div className="flex flex-col">
-            {/* Cambié los tamaños con clamp() */}
-            <h4 className="text-[1rem] font-[400]">
+            <h4 className="text-[1rem] font-[400] text-white/80">
               {playlist.public ? "Lista pública" : "Lista Privada"}
             </h4>
             <h1 className="text-[5vw] font-bold sm:text-[40px] md:text-[50px] lg:text-[60px] xl:text-[70px]">
                 {playlist.name}
             </h1>
-            <h4 className="text-[1rem]">
-              <b>{playlist.owner.display_name}</b> • {trackCount} canciones, {time}
+            <h4 className="text-[1rem] text-white/80">
+              <b className="text-white">{playlist.owner.display_name}</b> • {trackCount} canciones, {time}
             </h4>
           </div>
         </div>

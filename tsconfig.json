@@ -15,6 +15,7 @@
       "@/*": ["src/*"],
       "@/astro*": ["src/components/astro/*"],
       "@/react*": ["src/components/react/*"],
+      "@/assets*": ["src/assets/*"],
     }
   }
 }
