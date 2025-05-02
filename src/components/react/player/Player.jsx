@@ -8,6 +8,7 @@ import {
 } from 'react-spotify-web-playback-sdk';
 import { refreshAccessToken } from '@/hooks/utils';
 import { useSpotifyAutoConnectPlayer } from "@/hooks/useSpotifyAutoConnectPlayer";
+import '@/styles/player/player.css';
 
 export default function Player({ spotifyClientId, spotifyClientSecret }) {
     const [authToken, setAuthToken] = useState(null);
@@ -65,6 +66,7 @@ function PlayerUI({ authToken }) {
     const [progress, setProgress] = useState(0);
     const [position, setPosition] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(playbackState?.volume || 0.5);
 
     useSpotifyAutoConnectPlayer(authToken, device?.device_id);
 
@@ -72,6 +74,12 @@ function PlayerUI({ authToken }) {
         if (playbackState) {
             setIsPaused(playbackState.paused);
             setDuration(playbackState.duration || 0);
+        }
+    }, [playbackState]);
+
+    useEffect(() => {
+        if (playbackState?.volume !== volume) {
+            setVolume(playbackState?.volume);
         }
     }, [playbackState]);
 
@@ -123,6 +131,24 @@ function PlayerUI({ authToken }) {
         return `${minutes}:${pad(seconds)}`;
     }
 
+    const handleVolumeChange = async (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        await player.setVolume(newVolume);
+    };
+
+    const getVolumeIcon = (volume) => {
+        if (volume === 0) {
+            return 'solar:volume-cross-outline';
+        } else if (volume <= 0.3) {
+            return 'solar:volume-outline';
+        } else if (volume <= 0.7) {
+            return 'solar:volume-small-outline';
+        } else {
+            return 'solar:volume-loud-outline';
+        }
+    };
+
     return (
         <div className="flex items-center justify-between bg-zinc-900 rounded-lg p-4">
             <div className="flex items-center space-x-4">
@@ -164,15 +190,23 @@ function PlayerUI({ authToken }) {
                 </div>
             </div>
             <div className="flex items-center space-x-2">
-                <iconify-icon icon="solar:volume-bold" width="20" height="20" className="text-white" />
+                <iconify-icon
+                    icon={getVolumeIcon(volume)}
+                    width="20"
+                    height="20"
+                    className="text-white"
+                />
                 <input
                     type="range"
                     min="0"
                     max="1"
                     step="0.01"
-                    value={(playbackState.volume ?? 0.5).toFixed(2)}
-                    onChange={e => player.setVolume(parseFloat(e.target.value))}
-                    className="w-24"
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    className="w-24 volume-slider"
+                    style={{
+                        background: `linear-gradient(to right, #00c951 ${volume * 100}%, #ccc ${volume * 100}%)`
+                    }}
                 />
             </div>
         </div>
