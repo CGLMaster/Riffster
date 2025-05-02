@@ -2,6 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import PlaylistFetcher from '@/react/PlaylistFetcher.jsx';
 import AsideMenu from '@/astro/aside/AsideMenu.astro';
+import Player from '@/react/player/Player.jsx';
 const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 
@@ -16,7 +17,7 @@ const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
         <slot />
     </main>
     <footer class="[grid-area:player] min-h-[100px]">
-        PLAYER
+        <Player client:only="react" spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret}/>
     </footer>
   </div>
 </Layout>
