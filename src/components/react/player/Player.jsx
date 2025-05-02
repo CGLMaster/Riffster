@@ -205,7 +205,7 @@ function PlayerUI({ authToken }) {
                     onChange={handleVolumeChange}
                     className="w-24 volume-slider"
                     style={{
-                        background: `linear-gradient(to right, #00c951 ${volume * 100}%, #ccc ${volume * 100}%)`
+                        background: `linear-gradient(to right, #00c951 ${volume * 100}%, #4a5565 ${volume * 100}%)`
                     }}
                 />
             </div>
