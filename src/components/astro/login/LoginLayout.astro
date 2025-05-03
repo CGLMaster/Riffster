@@ -1,0 +1,43 @@
+---
+import spotifyAPI from "@/assets/img/spotify-api.png";
+import wolfLogo from "@/assets/img/loading_wolf_riffter.png";
+import LoginButton from "@/react/login/LoginButton.jsx";
+
+const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+const spotifyRedirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+const spotifyScopes = import.meta.env.VITE_SPOTIFY_SCOPES;
+---
+
+<div class="general">
+    <div id="login" class="bg-zinc-900 h-[100vh] flex flex-col justify-center items-center relative gap-10">
+        <div class="absolute w-full lg:w-1/2 inset-y-0 lg:right-0">
+            <span class="absolute right-4 bottom-12 w-24 h-24 rounded-3xl bg-primary blur-xl opacity-80"></span>
+        </div>
+        <span class="w-4/12 lg:w-2/12 aspect-square bg-gradient-to-tr from-primary to-green-500 absolute -top-5 lg:left-0 rounded-full skew-y-12 blur-2xl opacity-40 skew-x-12 rotate-90 animate-[pulse_3s_infinite]"></span>
+        <span class="absolute left-7/12 top-1/2 w-32 h-32 bg-green-600 blur-3xl opacity-60 rounded-full animate-[pulse_3s_infinite] scale-80"></span>
+        <span class="absolute top-10 right-20 w-16 h-16 bg-green-400 blur-2xl opacity-50 rounded-full animate-[pulse_3s_infinite] scale-110"></span>
+
+        <div class="flex flex-col justify-center items-center">
+            <img src={wolfLogo.src} alt="Riffter Logo" class="w-100" />
+            <h1 class="text-center text-4xl font-bold mt-4 text-white">
+                Bienvenido a Riffter
+            </h1>
+        </div>
+
+        <div class="flex flex-col justify-center items-center">
+            <LoginButton
+                client:load
+                clientId={spotifyClientId}
+                redirectUri={spotifyRedirectUri}
+                scopes={spotifyScopes}
+            />
+        </div>
+
+        <div class="absolute bottom-0 right-0">
+            <a href="https://developer.spotify.com/" target="_blank" rel="noopener noreferrer" class="flex flex-row items-center mb-4 mr-4 gap-3 w-auto">
+                <img src={spotifyAPI.src} alt="Spotify API Logo" class="w-10" />
+                <p class="text-green-500 text-2xl font-bold">Spotify API</p>
+            </a>
+        </div>
+    </div>
+</div>
