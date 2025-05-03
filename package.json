@@ -21,6 +21,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
     "react-spotify-web-playback-sdk": "^3.0.2",
+    "react-window": "^1.8.11",
     "svelte": "^5.20.5",
     "tailwindcss": "^4.0.9",
     "typescript": "^5.8.2"

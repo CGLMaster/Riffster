@@ -17,6 +17,7 @@
       "@/react*": ["src/components/react/*"],
       "@/assets*": ["src/assets/*"],
       "@/styles*": ["src/styles/*"],
+      "@/hooks*": ["src/hooks/*"],
     }
   }
 }

@@ -90,35 +90,15 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
   const remainingMinutes = totalMinutes % 60;
 
   const time = totalHours > 0 ? `${totalHours}h ${remainingMinutes}m` : `${totalMinutes}m`;
-  /*
-  let time;
-  if (totalHours >= 24) {
-    time = "Más de 24h";
-  } else if (totalHours >= 10) {
-    time = `${totalHours}h aproximadamente`;
-  } else if (totalHours >= 1) {
-    if (remainingMinutes >= 45) {
-      time = `${totalHours + 1}h aproximadamente`;
-    } else if (remainingMinutes >= 30) {
-      time = `${totalHours}h 30min aproximadamente`;
-    } else if (remainingMinutes >= 15) {
-      time = `${totalHours}h 15min aproximadamente`;
-    } else {
-      time = `${totalHours}h aproximadamente`;
-    }
-  } else {
-    time = `${totalMinutes} min ${totalSeconds % 60} seg`;
-  }
-  */
 
   return (
-    <div className="relative playlist-scroll h-full overflow-y-auto min-w-[570px]">
+    <div className="relative h-full overflow-y-hidden min-w-[570px]">
       <div className="relative z-10 bg-gradient-to-b from-[#942a2a] to-[#530f0f]">
         <div className="px-6 pt-10 flex items-end gap-5 pb-6">
           <img
             src={playlist.images[0]?.url}
             alt="Playlist cover"
-            className="object-cover w-[23%] h-[23%] rounded-md shadow-xl shadow-black/40"
+            className="object-cover w-[15%] h-[15%] rounded-md shadow-xl shadow-black/40"
           />
           <div className="flex flex-col">
             <h4 className="text-[1rem] font-[400] text-white/80">
@@ -133,26 +113,7 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
           </div>
         </div>
       </div>
-      <PlaylistList allTracks={allTracks} />
-      <style>{`
-        .playlist-scroll {
-          position: relative; /* Asegura que el scroll se posicione correctamente sobre el contenido */
-        }
-        .playlist-scroll::-webkit-scrollbar {
-          width: 10px;
-          z-index: 1000; /* Asegura que el scrollbar esté sobre el contenido, pero sin cortar el fondo */
-        }
-        .playlist-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .playlist-scroll::-webkit-scrollbar-thumb {
-          background-color: rgba(255, 255, 255, 0.3);
-          border-radius: 0px;
-        }
-        .playlist-scroll::-webkit-scrollbar-thumb:hover {
-          background-color: rgba(255, 255, 255, 0.5);
-        }
-      `}</style>
+      <PlaylistList allTracks={allTracks} playlistId={id} />
     </div>
   );
 }
