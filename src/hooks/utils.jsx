@@ -19,6 +19,25 @@ export function usePlaylists() {
   return playlists;
 }
 
+export function useAlbums() {
+  const [albums, setAlbums] = useState([]);
+
+  useEffect(() => {
+    const albumsJSON = localStorage.getItem("albums");
+    if (albumsJSON) {
+      try {
+        const parsed = JSON.parse(albumsJSON);
+        console.log("Albums:", parsed);
+        setAlbums(parsed);
+      } catch (e) {
+        console.error("Error parseando Albums:", e);
+      }
+    }
+  }, []);
+
+  return albums;
+}
+
 export const refreshAccessToken = async (clientId, clientSecret) => {
   const refreshToken = localStorage.getItem("refresh_token");
   console.log("Refresh token:", refreshToken);

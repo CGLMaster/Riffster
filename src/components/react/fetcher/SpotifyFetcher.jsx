@@ -2,9 +2,15 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { refreshAccessToken } from "@/hooks/utils";
 
-export default function PlaylistFetcher({spotifyClientId, spotifyClientSecret}) {
+export default function SpotifyFetcher({
+  apiUrl,
+  storageKey,
+  spotifyClientId,
+  spotifyClientSecret,
+  params = { limit: 20 }
+}) {
   useEffect(() => {
-    const fetchPlaylists = async () => {
+    const fetchData = async () => {
       const access_token = localStorage.getItem("access_token");
 
       if (!access_token) {
@@ -13,32 +19,30 @@ export default function PlaylistFetcher({spotifyClientId, spotifyClientSecret}) 
       }
 
       try {
-        const response = await axios.get("https://api.spotify.com/v1/me/playlists", {
+        const response = await axios.get(apiUrl, {
           headers: {
             Authorization: `Bearer ${access_token}`,
           },
-          params: { limit: 20 },
+          params,
         });
-        console.log("Playlists obtenidas:", response.data.items);
-        localStorage.setItem("playlists", JSON.stringify(response.data.items));
+        console.log(`${storageKey} obtenidos:`, response.data.items);
+        localStorage.setItem(storageKey, JSON.stringify(response.data.items));
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          console.log("Refresh Token")
-          console.log(spotifyClientId)
           const newAccessToken = await refreshAccessToken(spotifyClientId, spotifyClientSecret);
           if (newAccessToken) {
-            fetchPlaylists();
+            fetchData();
           } else {
             console.error("No se pudo obtener un nuevo token de acceso");
           }
         } else {
-          console.error("Error al obtener playlists:", error);
+          console.error(`Error al obtener ${storageKey}:`, error);
         }
       }
     };
 
-    fetchPlaylists();
-  }, []);
+    fetchData();
+  }, [apiUrl, storageKey, spotifyClientId, spotifyClientSecret, params]);
 
   return null;
 }

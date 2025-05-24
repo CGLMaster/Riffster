@@ -1,16 +1,42 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import ClientPlaylistMain from "@/react/main/ClientPlaylistMain";
+import ClientPlaylistMain from "@/components/react/main/playlist/ClientPlaylistMain";
+import ClientAlbumMain from "@/components/react/main/album/ClientAlbumMain";
 ---
 
 <Layout title="Riffster">
-    <div id="playlist-container" class="relative transition-all duration-1000 bg-red-500">
-        <div class="relative z-10 px-6 pt-10">
-            <h1 class="text-2xl font-bold">Buenos días</h1>
+    <div
+        id="playlist-container"
+        class="relative transition-all duration-1000 bg-red-500"
+        style="height: 100%; max-height: 100vh; display: flex; flex-direction: column;"
+    >
+        <div
+            class="relative z-10 px-6 pt-10 scrollable"
+            style="flex: 1 1 0%; min-height: 0; overflow-y: auto;"
+        >
             <div class="flex flex-wrap mt-6 gap-4">
                 <ClientPlaylistMain client:only="react" />
+                <ClientAlbumMain client:only="react" />
             </div>
         </div>
         <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80"></div>
     </div>
 </Layout>
+
+<style>
+    .scrollable::-webkit-scrollbar {
+      width: 8px;
+    }
+    .scrollable::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 8px;
+    }
+    .scrollable::-webkit-scrollbar-thumb {
+      background-color: rgba(31, 41, 55, 0.5);
+      border-radius: 8px;
+      transition: display 0.3s ease;
+    }
+    .scrollable::-webkit-scrollbar-button {
+      display: none;
+    }
+</style>

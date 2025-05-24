@@ -1,23 +1,43 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import PlaylistFetcher from '@/react/PlaylistFetcher.jsx';
-import AsideMenu from '@/astro/aside/AsideMenu.astro';
-import Player from '@/react/player/Player.jsx';
+import Layout from "@/layouts/Layout.astro";
+import SpotifyFetchers from "@/components/react/fetcher/SpotifyFetchers";
+import AsideMenu from "@/astro/aside/AsideMenu.astro";
+import Player from "@/react/player/Player.jsx";
 const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-
 ---
+
 <Layout>
-  <PlaylistFetcher client:only="react" spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret}/>
+  <SpotifyFetchers
+    client:only="react"
+    configs={[
+      {
+        apiUrl: "https://api.spotify.com/v1/me/albums",
+        storageKey: "albums",
+        spotifyClientId,
+        spotifyClientSecret,
+      },
+      {
+        apiUrl: "https://api.spotify.com/v1/me/playlists",
+        storageKey: "playlists",
+        spotifyClientId,
+        spotifyClientSecret,
+      },
+    ]}
+  />
   <div id="app" class="relative h-screen p-2 gap-2">
     <aside class="[grid-area:aside] flex-col flex overflow-y-auto">
-        <AsideMenu />
+      <AsideMenu />
     </aside>
     <main class="[grid-area:main] rounded-lg bg-zinc-900 overflow-y-auto">
-        <slot />
+      <slot />
     </main>
     <footer class="[grid-area:player] min-h-[100px]">
-        <Player client:only="react" spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret}/>
+      <Player
+        client:only="react"
+        spotifyClientId={spotifyClientId}
+        spotifyClientSecret={spotifyClientSecret}
+      />
     </footer>
   </div>
 </Layout>
