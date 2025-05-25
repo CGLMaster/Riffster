@@ -7,7 +7,7 @@ import {
     useErrorState
 } from 'react-spotify-web-playback-sdk';
 import { refreshAccessToken } from '@/hooks/utils';
-import { useSpotifyAutoConnectPlayer } from "@/hooks/useSpotifyAutoConnectPlayer";
+import { useSpotifyAutoConnectPlayer, getSpotifyPlayerState } from "@/hooks/useSpotifyAutoConnectPlayer";
 import '@/styles/player/player.css';
 
 export default function Player({ spotifyClientId, spotifyClientSecret }) {
@@ -51,52 +51,70 @@ export default function Player({ spotifyClientId, spotifyClientSecret }) {
             initialVolume={0.5}
             connectOnInitialized={true}
         >
-            <PlayerUI authToken={authToken} />
+            <PlayerUI authToken={authToken} spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret} />
         </WebPlaybackSDK>
     );
 }
 
-function PlayerUI({ authToken }) {
+function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
     const player = useSpotifyPlayer();
     const playbackState = usePlaybackState();
     const device = usePlayerDevice();
     const error = useErrorState();
 
     const [isPaused, setIsPaused] = useState(playbackState?.paused);
+    const [optimisticPaused, setOptimisticPaused] = useState(null);
     const [progress, setProgress] = useState(0);
     const [position, setPosition] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(playbackState?.volume || 0.5);
+    const [volume, setVolume] = useState(0.5);
+    const [lastVolumeChange, setLastVolumeChange] = useState(0);
+    const [optimisticVolume, setOptimisticVolume] = useState(null);
+    const [repeatMode, setRepeatMode] = useState("off");
+    const [shuffleMode, setShuffleMode] = useState(false);
+    const [playerState, setPlayerState] = useState(null);
 
     useSpotifyAutoConnectPlayer(authToken, device?.device_id);
 
     useEffect(() => {
-        if (playbackState) {
-            setIsPaused(playbackState.paused);
-            setDuration(playbackState.duration || 0);
-        }
-    }, [playbackState]);
+        if (!authToken) return;
+        let interval = setInterval(async () => {
+            const state = await getSpotifyPlayerState(
+                authToken,
+                () => refreshAccessToken(spotifyClientId, spotifyClientSecret)
+            );
+            setPlayerState(state);
 
-    useEffect(() => {
-        if (playbackState?.volume !== volume) {
-            setVolume(playbackState?.volume);
-        }
-    }, [playbackState]);
-
-    useEffect(() => {
-        if (!player) return;
-
-        const interval = setInterval(async () => {
-            const state = await player.getCurrentState();
             if (state) {
-                setPosition(state.position);
-                setDuration(state.duration);
-                setProgress((state.position / state.duration) * 100);
+                if (optimisticPaused !== null) {
+                    if (state.is_playing === !optimisticPaused) {
+                        setOptimisticPaused(null);
+                    }
+                }
+                setIsPaused(!state.is_playing);
+                setProgress(state.progress_ms && state.item?.duration_ms
+                    ? (state.progress_ms / state.item.duration_ms) * 100
+                    : 0);
+                setPosition(state.progress_ms || 0);
+                setDuration(state.item?.duration_ms || 0);
+                let apiVolume = state.device?.volume_percent;
+                if (typeof apiVolume !== "number" || isNaN(apiVolume)) apiVolume = 50;
+                const apiVolumeNormalized = apiVolume / 100;
+                if (optimisticVolume !== null) {
+                    if (Math.abs(apiVolumeNormalized - optimisticVolume) < 0.01) {
+                        setOptimisticVolume(null);
+                    }
+                }
+                if (optimisticVolume === null && Date.now() - lastVolumeChange > 1200) {
+                    setVolume(apiVolumeNormalized);
+                }
+                setRepeatMode(state.repeat_state || "off");
+                setShuffleMode(state.shuffle_state || false);
             }
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [player]);
+    }, [authToken, lastVolumeChange, spotifyClientId, spotifyClientSecret]);
 
     if (error) {
         return <div className="p-4 text-center text-white">Error: {error.message}</div>;
@@ -108,13 +126,32 @@ function PlayerUI({ authToken }) {
 
     const { current_track } = playbackState.track_window;
 
-    const handlePlayPause = () => {
-        if (isPaused) {
-            player.resume();
-        } else {
-            player.pause();
+    const handlePlayPause = async () => {
+        try {
+            if (isPaused) {
+                setOptimisticPaused(false);
+                await fetch("https://api.spotify.com/v1/me/player/play", {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                });
+            } else {
+                setOptimisticPaused(true);
+                await fetch("https://api.spotify.com/v1/me/player/pause", {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                });
+            }
+        } catch (err) {
+            setOptimisticPaused(null);
+            console.error("Error al pausar/reanudar la reproducción:", err);
         }
     };
+
+    const pausedToShow = optimisticPaused !== null ? optimisticPaused : isPaused;
 
     function formatTime(ms) {
         if (!ms || ms < 0) return '0:00';
@@ -134,7 +171,21 @@ function PlayerUI({ authToken }) {
     const handleVolumeChange = async (e) => {
         const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
-        await player.setVolume(newVolume);
+        setOptimisticVolume(newVolume);
+        setLastVolumeChange(Date.now());
+        try {
+            await fetch(
+                `https://api.spotify.com/v1/me/player/volume?volume_percent=${Math.round(newVolume * 100)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                }
+            );
+        } catch (err) {
+            console.error("Error al cambiar el volumen:", err);
+        }
     };
 
     const getVolumeIcon = (volume) => {
@@ -149,36 +200,103 @@ function PlayerUI({ authToken }) {
         }
     };
 
+    const handleShuffleClick = async () => {
+        try {
+            await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${!shuffleMode}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+            setShuffleMode(!shuffleMode);
+        } catch (err) {
+            console.error("Error al cambiar el modo de mezclado:", err);
+        }
+    };
+    const handleRepeatClick = async () => {
+        const nextMode = repeatMode === "off" ? "context" : repeatMode === "context" ? "track" : "off";
+        try {
+            await fetch(`https://api.spotify.com/v1/me/player/repeat?state=${nextMode}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+            setRepeatMode(nextMode);
+        } catch (err) {
+            console.error("Error al cambiar el modo de repetición:", err);
+        }
+    };
+    const handleNextTrack = async () => {
+        try {
+            await fetch("https://api.spotify.com/v1/me/player/next", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+        } catch (err) {
+            console.error("Error al pasar a la siguiente canción:", err);
+        }
+    };
+
+    const handlePreviousTrack = async () => {
+        try {
+            await fetch("https://api.spotify.com/v1/me/player/previous", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+        } catch (err) {
+            console.error("Error al volver a la canción anterior:", err);
+        }
+    };
+
     return (
-        <div className="flex items-center justify-between bg-zinc-900 rounded-lg p-4">
-            <div className="flex items-center space-x-4">
+        <div
+            className="bg-zinc-900 rounded-lg p-4"
+            style={{
+                display: "grid",
+                gridTemplateColumns: "200px 1fr 180px",
+                alignItems: "center",
+                gap: "1rem"
+            }}
+        >
+            <div className="flex items-center space-x-4 min-w-0 max-w-[200px] overflow-hidden">
                 <img
                     src={current_track.album.images[0].url}
                     alt={current_track.name}
                     className="w-12 h-12 rounded"
                 />
-                <div>
-                    <div className="text-white font-semibold">{current_track.name}</div>
-                    <div className="text-gray-400 text-sm">
+                <div className="min-w-0">
+                    <div className="text-white font-semibold truncate">{current_track.name}</div>
+                    <div className="text-gray-400 text-sm truncate">
                         {current_track.artists.map(a => a.name).join(', ')}
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col items-center space-y-2">
+            <div className="flex flex-col items-center space-y-2 justify-self-center w-full max-w-xl">
                 <div className="flex items-center space-x-4">
-                    <button onClick={() => player.previousTrack()} className="text-white hover:text-green-500">
-                        <iconify-icon icon="solar:skip-previous-bold" width="20" height="20" className="text-white/60" />
+                    <button onClick={handleShuffleClick} className="hover:cursor-pointer" title="Mezclar">
+                        <iconify-icon icon={"iconamoon:playlist-shuffle-duotone"} width="24" height="24" className={shuffleMode ? "text-green-500" : "text-white/60"} />
                     </button>
-                    <button onClick={handlePlayPause} className="text-white hover:text-green-500">
-                        {isPaused ? (
-                            <iconify-icon icon="solar:play-bold" width="20" height="20" className="text-white/60" />
+                    <button onClick={handlePreviousTrack} className="hover:cursor-pointer">
+                        <iconify-icon icon="solar:skip-previous-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                    </button>
+                    <button onClick={handlePlayPause} className="hover:cursor-pointer">
+                        {pausedToShow ? (
+                            <iconify-icon icon="solar:play-bold" width="20" height="20" className="text-white/60 hover:text-white" />
                         ) : (
-                            <iconify-icon icon="solar:pause-bold" width="20" height="20" className="text-white/60" />
+                            <iconify-icon icon="solar:pause-bold" width="20" height="20" className="text-white/60 hover:text-white" />
                         )}
                     </button>
-                    <button onClick={() => player.nextTrack()} className="text-white hover:text-green-500">
-                        <iconify-icon icon="solar:skip-next-bold" width="20" height="20" className="text-white/60" />
+                    <button onClick={handleNextTrack} className="hover:cursor-pointer">
+                        <iconify-icon icon="solar:skip-next-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                    </button>
+                    <button onClick={handleRepeatClick} className="hover:cursor-pointer" title="Repetir">
+                        <iconify-icon icon={repeatMode === "track" ? "ph:repeat-once-bold" : "ph:repeat-bold"} width="24" height="24" className={repeatMode === "off" ? "text-white/60" : "text-green-500"} />
                     </button>
                 </div>
                 <div className="flex items-center space-x-2 w-96">
@@ -189,7 +307,8 @@ function PlayerUI({ authToken }) {
                     <span className="text-xs text-gray-400 w-12">{formatTime(duration)}</span>
                 </div>
             </div>
-            <div className="flex items-center space-x-2">
+
+            <div className="flex items-center space-x-2 justify-self-end">
                 <iconify-icon
                     icon={getVolumeIcon(volume)}
                     width="20"
