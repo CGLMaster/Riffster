@@ -1,8 +1,18 @@
 ---
-import RiffsterLayout from '@/layouts/RiffsterLayout.astro';
-import MainContainer from '@/components/astro/main/index.astro';
+import RiffsterLayout from "@/layouts/RiffsterLayout.astro";
+import MainContainer from "@/components/astro/main/index.astro";
+import AuthHandler from "@/components/react/AuthHandler";
+const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+const spotifyRedirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
 ---
+
 <RiffsterLayout>
     <MainContainer />
+    <AuthHandler
+        client:only="react"
+        clientId={spotifyClientId}
+        clientSecret={spotifyClientSecret}
+        redirectUri={spotifyRedirectUri}
+    />
 </RiffsterLayout>
-

@@ -23,6 +23,19 @@ const spotifyClientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
         spotifyClientId,
         spotifyClientSecret,
       },
+      {
+        apiUrl: "https://api.spotify.com/v1/me/following",
+        storageKey: "artists",
+        spotifyClientId,
+        spotifyClientSecret,
+        params: { type: "artist", limit: 20 }
+      },
+      {
+        apiUrl: "https://api.spotify.com/v1/me/top/artists",
+        storageKey: "topArtists",
+        spotifyClientId,
+        spotifyClientSecret,
+      },
     ]}
   />
   <div id="app" class="relative h-screen p-2 gap-2">

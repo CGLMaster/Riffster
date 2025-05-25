@@ -4,7 +4,8 @@ export default function LoginButton({ clientId, redirectUri, scopes }) {
       `?client_id=${clientId}` +
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&scope=${encodeURIComponent(scopes)}`;
+      `&scope=${encodeURIComponent(scopes)}` +
+      `&show_dialog=true`;
   
     function login() {
       window.location.replace(spoty_url);

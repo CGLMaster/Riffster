@@ -41,7 +41,7 @@ export default function Player({ spotifyClientId, spotifyClientSecret }) {
         return <div className="p-4 text-center text-white">Auth Error: {authError}</div>;
     }
     if (!authToken) {
-        return <div className="p-4 text-center text-gray-400">Obteniendo token...</div>;
+        return <div className="p-4 text-center text-gray-400">Cargando reproductor...</div>;
     }
 
     return (
@@ -49,7 +49,6 @@ export default function Player({ spotifyClientId, spotifyClientSecret }) {
             initialDeviceName="Riffter Player"
             getOAuthToken={getOAuthToken}
             initialVolume={0.5}
-            connectOnInitialized={true}
         >
             <PlayerUI authToken={authToken} spotifyClientId={spotifyClientId} spotifyClientSecret={spotifyClientSecret} />
         </WebPlaybackSDK>
@@ -57,10 +56,11 @@ export default function Player({ spotifyClientId, spotifyClientSecret }) {
 }
 
 function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
-    const player = useSpotifyPlayer();
+    // const player = useSpotifyPlayer();
     const playbackState = usePlaybackState();
     const device = usePlayerDevice();
     const error = useErrorState();
+    const isReadOnly = !!error;
 
     const [isPaused, setIsPaused] = useState(playbackState?.paused);
     const [optimisticPaused, setOptimisticPaused] = useState(null);
@@ -73,6 +73,8 @@ function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
     const [repeatMode, setRepeatMode] = useState("off");
     const [shuffleMode, setShuffleMode] = useState(false);
     const [playerState, setPlayerState] = useState(null);
+    const [useDevice, setUseDevice] = useState(null);
+    const [isOnDevice, setIsOnDevice] = useState(true);
 
     useSpotifyAutoConnectPlayer(authToken, device?.device_id);
 
@@ -86,6 +88,9 @@ function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
             setPlayerState(state);
 
             if (state) {
+                if (state.device?.id) {
+                    localStorage.setItem("last_active_device_id", state.device.id);
+                }
                 if (optimisticPaused !== null) {
                     if (state.is_playing === !optimisticPaused) {
                         setOptimisticPaused(null);
@@ -110,21 +115,32 @@ function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
                 }
                 setRepeatMode(state.repeat_state || "off");
                 setShuffleMode(state.shuffle_state || false);
+                setUseDevice(state.device || null);
             }
         }, 1000);
 
         return () => clearInterval(interval);
     }, [authToken, lastVolumeChange, spotifyClientId, spotifyClientSecret]);
 
-    if (error) {
+
+    /*if (error) {
         return <div className="p-4 text-center text-white">Error: {error.message}</div>;
     }
 
     if (!playbackState || !playbackState.track_window?.current_track) {
         return <div className="p-4 text-center text-gray-400">Conectando al reproductor...</div>;
-    }
+    }*/
 
-    const { current_track } = playbackState.track_window;
+    // const { current_track } = playbackState.track_window;
+
+    useEffect(() => {
+        if (!playbackState || !playbackState.track_window?.current_track) {
+            setIsOnDevice(false);
+        } else {
+            setIsOnDevice(true);
+        }
+    }, [playbackState, error]);
+
 
     const handlePlayPause = async () => {
         try {
@@ -253,82 +269,141 @@ function PlayerUI({ authToken, spotifyClientId, spotifyClientSecret }) {
         }
     };
 
+    const handleTransferPlayback = async () => {
+        try {
+            if (!device?.device_id) return;
+            await fetch("https://api.spotify.com/v1/me/player", {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    device_ids: [device.device_id],
+                    play: true
+                }),
+            });
+        } catch (err) {
+            console.error("Error al transferir la reproducción:", err);
+        }
+    };
+
     return (
-        <div
-            className="bg-zinc-900 rounded-lg p-4"
-            style={{
-                display: "grid",
-                gridTemplateColumns: "200px 1fr 180px",
-                alignItems: "center",
-                gap: "1rem"
-            }}
-        >
-            <div className="flex items-center space-x-4 min-w-0 max-w-[200px] overflow-hidden">
-                <img
-                    src={current_track.album.images[0].url}
-                    alt={current_track.name}
-                    className="w-12 h-12 rounded"
-                />
-                <div className="min-w-0">
-                    <div className="text-white font-semibold truncate">{current_track.name}</div>
-                    <div className="text-gray-400 text-sm truncate">
-                        {current_track.artists.map(a => a.name).join(', ')}
-                    </div>
-                </div>
-            </div>
+        <>
+            {playerState && playerState.item && (
+                <>
+                    <div
+                        className="bg-zinc-900 rounded-lg p-4"
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "200px 1fr 180px",
+                            alignItems: "center",
+                            gap: "1rem"
+                        }}
+                    >
+                        <div className="flex items-center space-x-4 min-w-0 max-w-[200px] overflow-hidden">
+                            <img
+                                src={playerState.item.album.images[0].url}
+                                alt={playerState.item.name}
+                                className="w-12 h-12 rounded"
+                            />
+                            <div className="min-w-0">
+                                <div className="text-white font-semibold truncate">{playerState.item.name}</div>
+                                <div className="text-gray-400 text-sm truncate">
+                                    {playerState.item.artists.map(a => a.name).join(', ')}
+                                </div>
+                            </div>
+                        </div>
 
-            <div className="flex flex-col items-center space-y-2 justify-self-center w-full max-w-xl">
-                <div className="flex items-center space-x-4">
-                    <button onClick={handleShuffleClick} className="hover:cursor-pointer" title="Mezclar">
-                        <iconify-icon icon={"iconamoon:playlist-shuffle-duotone"} width="24" height="24" className={shuffleMode ? "text-green-500" : "text-white/60"} />
-                    </button>
-                    <button onClick={handlePreviousTrack} className="hover:cursor-pointer">
-                        <iconify-icon icon="solar:skip-previous-bold" width="20" height="20" className="text-white/60 hover:text-white" />
-                    </button>
-                    <button onClick={handlePlayPause} className="hover:cursor-pointer">
-                        {pausedToShow ? (
-                            <iconify-icon icon="solar:play-bold" width="20" height="20" className="text-white/60 hover:text-white" />
-                        ) : (
-                            <iconify-icon icon="solar:pause-bold" width="20" height="20" className="text-white/60 hover:text-white" />
-                        )}
-                    </button>
-                    <button onClick={handleNextTrack} className="hover:cursor-pointer">
-                        <iconify-icon icon="solar:skip-next-bold" width="20" height="20" className="text-white/60 hover:text-white" />
-                    </button>
-                    <button onClick={handleRepeatClick} className="hover:cursor-pointer" title="Repetir">
-                        <iconify-icon icon={repeatMode === "track" ? "ph:repeat-once-bold" : "ph:repeat-bold"} width="24" height="24" className={repeatMode === "off" ? "text-white/60" : "text-green-500"} />
-                    </button>
-                </div>
-                <div className="flex items-center space-x-2 w-96">
-                    <span className="text-xs text-gray-400 w-12 text-right">{formatTime(position)}</span>
-                    <div className="flex-1 h-1 bg-gray-600 rounded overflow-hidden">
-                        <div className="h-full bg-green-500 rounded" style={{ width: `${progress}%` }} />
-                    </div>
-                    <span className="text-xs text-gray-400 w-12">{formatTime(duration)}</span>
-                </div>
-            </div>
+                        <div className="flex flex-col items-center space-y-2 justify-self-center w-full max-w-xl">
+                            {isReadOnly && (
+                                <div className="text-xs text-center text-yellow-400 mb-2">
+                                    Solo puedes visualizar el reproductor. Se requiere Spotify Premium para controlar la reproducción.
+                                </div>
+                            )}
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={handleShuffleClick}
+                                    disabled={isReadOnly}
+                                    className={`hover:cursor-pointer ${isReadOnly ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    title="Mezclar"
+                                >
+                                    <iconify-icon icon={"iconamoon:playlist-shuffle-duotone"} width="24" height="24" className={shuffleMode ? "text-green-500 hover:text-green-700" : "text-white/60 hover:text-white"} />
+                                </button>
+                                <button
+                                    onClick={handlePreviousTrack}
+                                    disabled={isReadOnly}
+                                    className={`hover:cursor-pointer ${isReadOnly ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <iconify-icon icon="solar:skip-previous-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                                </button>
+                                <button
+                                    onClick={handlePlayPause}
+                                    disabled={isReadOnly}
+                                    className={`hover:cursor-pointer ${isReadOnly ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    {pausedToShow ? (
+                                        <iconify-icon icon="solar:play-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                                    ) : (
+                                        <iconify-icon icon="solar:pause-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                                    )}
+                                </button>
+                                <button
+                                    onClick={handleNextTrack}
+                                    disabled={isReadOnly}
+                                    className={`hover:cursor-pointer ${isReadOnly ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <iconify-icon icon="solar:skip-next-bold" width="20" height="20" className="text-white/60 hover:text-white" />
+                                </button>
+                                <button
+                                    onClick={handleRepeatClick}
+                                    disabled={isReadOnly}
+                                    className={`hover:cursor-pointer ${isReadOnly ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    title="Repetir"
+                                >
+                                    <iconify-icon icon={repeatMode === "track" ? "ph:repeat-once-bold" : "ph:repeat-bold"} width="24" height="24" className={repeatMode === "off" ? "text-white/60 hover:text-white" : "text-green-500 hover:text-green-700"} />
+                                </button>
+                            </div>
+                            <div className="flex items-center space-x-2 w-96">
+                                <span className="text-xs text-gray-400 w-12 text-right">{formatTime(position)}</span>
+                                <div className="flex-1 h-1 bg-gray-600 rounded overflow-hidden">
+                                    <div className="h-full bg-green-500 rounded" style={{ width: `${progress}%` }} />
+                                </div>
+                                <span className="text-xs text-gray-400 w-12">{formatTime(duration)}</span>
+                            </div>
+                        </div>
 
-            <div className="flex items-center space-x-2 justify-self-end">
-                <iconify-icon
-                    icon={getVolumeIcon(volume)}
-                    width="20"
-                    height="20"
-                    className="text-white"
-                />
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="w-24 volume-slider"
-                    style={{
-                        background: `linear-gradient(to right, #00c951 ${volume * 100}%, #4a5565 ${volume * 100}%)`
-                    }}
-                />
-            </div>
-        </div>
+                        <div className="flex items-center space-x-2 justify-self-end">
+                            <iconify-icon
+                                icon={getVolumeIcon(volume)}
+                                width="20"
+                                height="20"
+                                className="text-white"
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                disabled={isReadOnly || !isOnDevice}
+                                className={`w-24 volume-slider ${(isReadOnly || !isOnDevice) ? "opacity-50 cursor-not-allowed" : ""}`}
+                                style={{
+                                    background: `linear-gradient(to right, #00c951 ${volume * 100}%, #4a5565 ${volume * 100}%)`
+                                }}
+                            />
+                        </div>
+                    </div>
+                    {!isOnDevice && (
+                        <div onClick={handleTransferPlayback} className='flex bg-green-500 rounded-lg items-center justify-end px-4 text-zinc-900 font-bold text-sm h-8 mt-2 hover:underline hover:cursor-pointer'>
+                            <iconify-icon icon="fluent:sound-wave-circle-16-filled" width="16" height="16" className="mr-2" />
+                            Reproduciendo en {useDevice?.name || "dispositivo desconocido"}
+                        </div>
+                    )}
+                </>
+            )}
+        </>
     );
 }
 

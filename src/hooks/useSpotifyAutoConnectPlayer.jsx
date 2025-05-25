@@ -37,13 +37,13 @@ export async function getSpotifyPlayerState(accessToken, refreshAccessToken) {
       },
     });
     if (response.status === 401 && typeof refreshAccessToken === "function") {
-      console.log("Entro")
       const newToken = await refreshAccessToken();
       if (newToken) {
         return await getSpotifyPlayerState(newToken, refreshAccessToken);
       }
       throw new Error("No se pudo refrescar el token de acceso");
     }
+    if (response.status === 204) return null;
     if (!response.ok) throw new Error("No se pudo obtener el estado del reproductor");
     return await response.json();
   } catch (err) {

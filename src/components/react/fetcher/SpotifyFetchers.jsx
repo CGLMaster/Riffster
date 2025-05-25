@@ -10,6 +10,7 @@ export default function SpotifyFetchers({ configs }) {
           storageKey={cfg.storageKey}
           spotifyClientId={cfg.spotifyClientId}
           spotifyClientSecret={cfg.spotifyClientSecret}
+          params={cfg.params}
         />
       ))}
     </>

@@ -38,13 +38,49 @@ export function useAlbums() {
   return albums;
 }
 
+export function useArtist() {
+  const [artists, setArtists] = useState([]);
+
+  useEffect(() => {
+    const artistsJSON = localStorage.getItem("artists");
+    if (artistsJSON) {
+      try {
+        const parsed = JSON.parse(artistsJSON);
+        console.log("Artistas:", parsed);
+        setArtists(parsed);
+      } catch (e) {
+        console.error("Error parseando Artistas:", e);
+      }
+    }
+  }, []);
+
+  return artists;
+}
+export function useTopArtist() {
+  const [topArtists, setTopArtists] = useState([]);
+
+  useEffect(() => {
+    const topArtistsJSON = localStorage.getItem("topArtists");
+    if (topArtistsJSON) {
+      try {
+        const parsed = JSON.parse(topArtistsJSON);
+        console.log("Top Artistas:", parsed);
+        setTopArtists(parsed);
+      } catch (e) {
+        console.error("Error parseando Top Artistas:", e);
+      }
+    }
+  }, []);
+
+  return topArtists;
+}
+
 export const refreshAccessToken = async (clientId, clientSecret) => {
   const refreshToken = localStorage.getItem("refresh_token");
-  console.log("Refresh token:", refreshToken);
-  console.log("ClientID:", clientId);
-  console.log("ClientSecret:", clientSecret);
   if (!refreshToken) {
       console.error("No se encontró refresh token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       return null;
   }
 
@@ -70,9 +106,17 @@ export const refreshAccessToken = async (clientId, clientSecret) => {
   try {
       const res = await fetch(url, payload);
       if (!res.ok) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
           throw new Error(`HTTP error! status: ${res.status}`);
       }
       const data = await res.json();
+
+      if (!data.access_token) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          return null;
+      }
 
       localStorage.setItem("access_token", data.access_token);
       if (data.refresh_token) {
@@ -81,6 +125,8 @@ export const refreshAccessToken = async (clientId, clientSecret) => {
       console.log("Token actualizado exitosamente");
       return data.access_token;
   } catch (error) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       console.error("Error al refrescar token:", error);
       return null;
   }

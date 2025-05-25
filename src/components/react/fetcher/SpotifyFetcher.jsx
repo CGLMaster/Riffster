@@ -7,7 +7,7 @@ export default function SpotifyFetcher({
   storageKey,
   spotifyClientId,
   spotifyClientSecret,
-  params = { limit: 20 }
+  params = { limit: 49 }
 }) {
   useEffect(() => {
     const fetchData = async () => {
@@ -25,8 +25,14 @@ export default function SpotifyFetcher({
           },
           params,
         });
-        console.log(`${storageKey} obtenidos:`, response.data.items);
-        localStorage.setItem(storageKey, JSON.stringify(response.data.items));
+        let items;
+        if (apiUrl.includes("/me/following")) {
+          items = response.data.artists?.items ?? [];
+        } else {
+          items = response.data.items ?? [];
+        }
+        console.log(`${storageKey} obtenidos:`, items);
+        localStorage.setItem(storageKey, JSON.stringify(items));
       } catch (error) {
         if (error.response && error.response.status === 401) {
           const newAccessToken = await refreshAccessToken(spotifyClientId, spotifyClientSecret);
