@@ -15,7 +15,7 @@ export default function LoginButton({ clientId, redirectUri, scopes }) {
       <>
         <button
           onClick={login}
-          className="relative z-10 cursor-pointer border-2 border-green-600 px-10 py-2 rounded-lg hover:bg-green-500 text-white font-bold text-lg transition duration-300 ease-in-out"
+          className="relative z-10 cursor-pointer border-2 border-cyan-800 px-10 py-2 rounded-lg hover:bg-cyan-700 text-white font-bold text-lg transition duration-300 ease-in-out"
         >
           INICIAR SESIÓN
         </button>

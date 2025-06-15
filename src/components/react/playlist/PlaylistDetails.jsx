@@ -92,8 +92,8 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
   const time = totalHours > 0 ? `${totalHours}h ${remainingMinutes}m` : `${totalMinutes}m`;
 
   return (
-    <div className="relative h-full overflow-y-hidden min-w-[570px]">
-      <div className="relative z-10 bg-gradient-to-b from-[#942a2a] to-[#530f0f]">
+    <div className="relative h-full overflow-hidden min-w-[570px] flex flex-col">
+      <div className="relative z-10 bg-gradient-to-b bg-cyan-900 flex-shrink-0">
         <div className="px-6 pt-10 flex items-end gap-5 pb-6">
           <img
             src={playlist.images[0]?.url}
@@ -113,7 +113,9 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
           </div>
         </div>
       </div>
-      <PlaylistList allTracks={allTracks} playlistId={id} />
+      <div className="flex-1 min-h-0">
+        <PlaylistList allTracks={allTracks} playlistId={id} />
+      </div>
     </div>
   );
 }

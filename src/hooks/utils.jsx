@@ -77,6 +77,7 @@ export function useTopArtist() {
 
 export const refreshAccessToken = async (clientId, clientSecret) => {
   const refreshToken = localStorage.getItem("refresh_token");
+  console.log("Refresh token:", refreshToken);
   if (!refreshToken) {
       console.error("No se encontró refresh token");
       localStorage.removeItem("access_token");

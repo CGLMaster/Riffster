@@ -30,7 +30,9 @@ export default function ClientGridMain({
     return (
         <div className="w-full">
             <div className="flex items-center justify-between mb-4 px-1">
-                <h1 className="text-2xl font-bold">{title}</h1>
+                {items.length > 0 && (
+                    <h1 className="text-2xl font-bold">{title}</h1>
+                )}
                 {items.length > columns && (
                     <button
                         onClick={() => setShowAll(v => !v)}

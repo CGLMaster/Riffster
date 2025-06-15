@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { FixedSizeList as List } from "react-window";
 import { useCurrentTrackId } from "@/hooks/useCurrentTrackId";
 
@@ -105,7 +105,7 @@ export default function PlaylistList({ allTracks, playlistId }) {
             return (
                 <div
                     style={style}
-                    className={`grid grid-cols-[30px_1.5fr_1.5fr_1fr_60px] items-center gap-x-2 px-6
+                    className={`grid grid-cols-[30px_1.5fr_1.5fr_1fr_60px] items-center gap-x-2 px-6 rounded-md
                       ${isCurrent ? "bg-white/20" : "group"}`}
                 >
                     <div className="flex items-center justify-start">
@@ -149,11 +149,29 @@ export default function PlaylistList({ allTracks, playlistId }) {
         [sortedTracks, currentTrackId]
     );
 
+    const listContainerRef = useRef(null);
+    const [listHeight, setListHeight] = useState(0);
+
+    useEffect(() => {
+        if (!listContainerRef.current) return;
+
+        const updateHeight = () => {
+            const container = listContainerRef.current;
+            if (container) {
+                setListHeight(container.clientHeight);
+            }
+        };
+
+        updateHeight();
+        window.addEventListener("resize", updateHeight);
+        return () => window.removeEventListener("resize", updateHeight);
+    }, []);
+
     return (
-        <div id="playlist-container" className="relative bg-zinc-900">
-            <div className="h-28 bg-gradient-to-b from-[#530f0f] to-zinc-900 pointer-events-none" />
-            <div className="relative z-10 px-6 pb-10 mt-[-5%]">
-                <div className="relative px-6">
+        <div id="playlist-container" className="h-full flex flex-col overflow-hidden">
+            <div className="h-28 bg-gradient-to-b from-cyan-900 to-zinc-900 pointer-events-none flex-shrink-0" />
+            <div className="relative z-10 px-6 mt-[-5%] flex flex-col flex-1 min-h-0">
+                <div className="relative px-6 flex-shrink-0">
                     <div className="grid grid-cols-[30px_1.5fr_1.5fr_1fr_60px] gap-x-2 text-white/60 text-sm tracking-wider pb-4 group">
                         <div>#</div>
                         <div onClick={() => handleSort("title")} className="group cursor-pointer select-none flex items-center gap-1 relative pr-4">
@@ -209,17 +227,19 @@ export default function PlaylistList({ allTracks, playlistId }) {
                     </div>
                     <div className="absolute left-[-10px] right-[-10px] bottom-0 h-px bg-white/20" />
                 </div>
-                <div className="pt-4 overflow-y-hidden">
-                    <List
-                        height={ROW_HEIGHT * 10}
-                        itemCount={sortedTracks.length}
-                        itemSize={ROW_HEIGHT}
-                        width="100%"
-                        overscanCount={OVERSCAN}
-                        className="no-scrollbars"
-                    >
-                        {Row}
-                    </List>
+                <div ref={listContainerRef} className="flex-1 min-h-0">
+                    {listHeight > 0 && (
+                        <List
+                            height={listHeight}
+                            itemCount={sortedTracks.length}
+                            itemSize={ROW_HEIGHT}
+                            width="100%"
+                            overscanCount={OVERSCAN}
+                            className="no-scrollbars"
+                        >
+                            {Row}
+                        </List>
+                    )}
                 </div>
             </div>
             <style>{`

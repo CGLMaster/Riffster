@@ -9,7 +9,7 @@ function AsideMenuCard({ playlist }) {
     >
       <div className="relative w-12 h-12">
         <img
-          src={images[0].url}
+          src={images && images[0]?.url ? images[0].url : "/src/assets/img/riffter_logo.png"}
           alt={name}
           className="object-cover w-full h-full rounded-md"
         />
