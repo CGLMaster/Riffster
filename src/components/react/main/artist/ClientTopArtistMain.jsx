@@ -1,4 +1,4 @@
-import MainTopArtistCard from "@/react/main/artist/MainTopArtistCard.jsx";
+import MainArtistCard from "@/react/main/artist/MainArtistCard.jsx";
 import { useTopArtist } from "@/hooks/utils.jsx";
 import ClientGridMain from "../global/ClientGridMain.jsx";
 
@@ -7,7 +7,7 @@ export default function ClientTopArtistMain() {
     <ClientGridMain
       title="Recomendados para ti"
       useItems={useTopArtist}
-      CardComponent={MainTopArtistCard}
+      CardComponent={MainArtistCard}
       getItem={item => item}
       itemPropName="artist"
     />

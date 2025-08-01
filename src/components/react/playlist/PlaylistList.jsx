@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { FixedSizeList as List } from "react-window";
 import { useCurrentTrackId } from "@/hooks/useCurrentTrackId";
+import ModalPremiumAlert from "@/components/react/main/global/ModalPremiumAlert";
 
 export default function PlaylistList({ allTracks, playlistId }) {
     const access_token = localStorage.getItem("access_token");
     const currentTrackId = useCurrentTrackId(access_token, 1000);
 
+    const [showPremiumAlert, setShowPremiumAlert] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const handleSort = (key) => {
         setSortConfig((prev) => {
@@ -52,7 +54,7 @@ export default function PlaylistList({ allTracks, playlistId }) {
     const playTrackInContext = async (trackId) => {
         const offsetIndex = allTracks.findIndex((item) => item.track.id === trackId);
         try {
-            await fetch("https://api.spotify.com/v1/me/player/play", {
+            const response = await fetch("https://api.spotify.com/v1/me/player/play", {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${access_token}`,
@@ -64,7 +66,11 @@ export default function PlaylistList({ allTracks, playlistId }) {
                     position_ms: 0,
                 }),
             });
+            if (response.status === 403) {
+                setShowPremiumAlert(true);
+            }
         } catch (err) {
+            setShowPremiumAlert(true);
             console.error("Error al reproducir dentro de la playlist:", err);
         }
     };
@@ -169,6 +175,7 @@ export default function PlaylistList({ allTracks, playlistId }) {
 
     return (
         <div id="playlist-container" className="h-full flex flex-col overflow-hidden">
+            <ModalPremiumAlert open={showPremiumAlert} onClose={() => setShowPremiumAlert(false)} />
             <div className="h-28 bg-gradient-to-b from-cyan-900 to-zinc-900 pointer-events-none flex-shrink-0" />
             <div className="relative z-10 px-6 mt-[-5%] flex flex-col flex-1 min-h-0">
                 <div className="relative px-6 flex-shrink-0">

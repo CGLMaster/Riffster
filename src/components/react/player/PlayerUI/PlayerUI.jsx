@@ -260,8 +260,8 @@ export default function PlayerUI({ authToken, spotifyClientId, spotifyClientSecr
                                 className="w-12 h-12 rounded"
                             />
                             <div className="min-w-0">
-                                <div className="text-white font-semibold truncate">{playerState.item.name}</div>
-                                <div className="text-gray-400 text-sm truncate">
+                                <div className="text-white font-semibold truncate" title={playerState.item.name}>{playerState.item.name}</div>
+                                <div className="text-gray-400 text-sm truncate" title={playerState.item.artists.map(a => a.name).join(', ')}>
                                     {playerState.item.artists.map(a => a.name).join(', ')}
                                 </div>
                             </div>

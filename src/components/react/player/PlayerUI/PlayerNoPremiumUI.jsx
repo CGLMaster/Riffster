@@ -85,7 +85,7 @@ export default function PlayerNoPremiumUI({ authToken }) {
 
     return (
         <>
-            {playerState && playerState.item && (
+            {playerState && playerState.item ? (
                 <div className="bg-zinc-900 rounded-lg p-4"
                     style={{
                         display: "grid",
@@ -100,8 +100,8 @@ export default function PlayerNoPremiumUI({ authToken }) {
                             className="w-12 h-12 rounded"
                         />
                         <div className="min-w-0">
-                            <div className="text-white font-semibold truncate">{playerState.item.name}</div>
-                            <div className="text-gray-400 text-sm truncate">
+                            <div className="text-white font-semibold truncate" title={playerState.item.name}>{playerState.item.name}</div>
+                            <div className="text-gray-400 text-sm truncate" title={playerState.item.artists.map(a => a.name).join(', ')}>
                                 {playerState.item.artists.map(a => a.name).join(', ')}
                             </div>
                         </div>
@@ -162,6 +162,19 @@ export default function PlayerNoPremiumUI({ authToken }) {
                             }}
                         />
                     </div>
+                </div>
+            ) : (
+                <div className="bg-zinc-900 rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[120px]">
+                    <div className="text-white text-lg font-semibold mb-2">Empieza a reproducir tu canción en Spotify</div>
+                    <div className="text-gray-400 mb-4">Abre Spotify y comienza a reproducir cualquier canción para ver el reproductor aquí.</div>
+                    <a
+                        href="https://open.spotify.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                    >
+                        Ir a Spotify
+                    </a>
                 </div>
             )}
         </>

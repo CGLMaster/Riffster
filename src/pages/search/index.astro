@@ -1,0 +1,27 @@
+---
+import Layout from "@/layouts/RiffsterLayout.astro";
+import ClientSearchMain from "@/components/react/main/search/ClientSearchMain";
+---
+
+<Layout title="Búsqueda - Riffster">
+  <div class="relative z-10 px-6 py-10 scrollable" style="flex: 1 1 0%; min-height: 0; overflow-y: auto; height: 100%; max-height: 100vh;">
+    <ClientSearchMain client:load />
+  </div>
+  <style>
+    .scrollable::-webkit-scrollbar {
+      width: 8px;
+    }
+    .scrollable::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 8px;
+    }
+    .scrollable::-webkit-scrollbar-thumb {
+      background-color: rgba(31, 41, 55, 0.5);
+      border-radius: 8px;
+      transition: display 0.3s ease;
+    }
+    .scrollable::-webkit-scrollbar-button {
+      display: none;
+    }
+  </style>
+</Layout>
