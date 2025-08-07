@@ -42,7 +42,7 @@ export default function ClientArtistMain({ id }) {
   return (
     <div className="w-full">
       <ArtistHeader artist={artist} />
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col xl:flex-row gap-10">
+      <div className="px-4 md:px-8 flex flex-col xl:flex-row gap-10">
         <div className="flex-1">
           <ArtistTrackList tracks={tracks} />
         </div>
@@ -50,7 +50,7 @@ export default function ClientArtistMain({ id }) {
           <ArtistInfoPanel artist={artist} />
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12">
+      <div className="px-4 md:px-8 mt-12">
         <h2 className="text-2xl font-bold mb-6">Discografía</h2>
         <ResponsiveAlbumGrid albums={albums} />
       </div>
@@ -61,7 +61,7 @@ export default function ClientArtistMain({ id }) {
 function ArtistHeader({ artist }) {
   return (
     <div className="w-full min-h-[320px] bg-gradient-to-b from-cyan-900 to-[#18181b] relative flex items-end">
-      <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-end md:items-center px-4 md:px-8 pb-8 gap-8">
+      <div className="max-w-7xl w-full flex flex-col md:flex-row items-end md:items-center px-4 md:px-8 pb-8 gap-8">
         <img
           src={artist.images?.[0]?.url}
           alt={artist.name}

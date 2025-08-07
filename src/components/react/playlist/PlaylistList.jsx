@@ -111,7 +111,7 @@ export default function PlaylistList({ allTracks, playlistId }) {
             return (
                 <div
                     style={style}
-                    className={`grid grid-cols-[30px_1.5fr_1.5fr_1fr_60px] items-center gap-x-2 px-6 rounded-md
+                    className={`grid grid-cols-[30px_1.5fr_1.5fr_1fr_60px] items-center gap-x-2 px-6 mb-1 rounded-md
                       ${isCurrent ? "bg-white/20" : "group"}`}
                 >
                     <div className="flex items-center justify-start">
