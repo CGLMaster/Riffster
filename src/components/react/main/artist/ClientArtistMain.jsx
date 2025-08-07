@@ -80,8 +80,8 @@ function ArtistHeader({ artist }) {
 function ArtistInfoPanel({ artist }) {
   const isFollowing = true;
   return (
-    <div className="bg-black/30 rounded-xl p-6 border border-zinc-800 shadow-lg flex flex-row sm:flex-col xl:flex-col gap-4 items-center relative justify-between">
-      <div className="min-w-28 min-h-28 relative mb-2 me-5 sm:me-0 xl:me-0">
+    <div className="bg-black/30 rounded-xl p-6 border border-zinc-800 shadow-lg flex flex-col md:flex-row xl:flex-col gap-4 items-center relative justify-between">
+      <div className="min-w-28 min-h-28 relative mb-2 me-0 md:me-5 xl:me-0">
         <img
           src={artist.images?.[0]?.url}
           alt={artist.name}
@@ -94,11 +94,11 @@ function ArtistInfoPanel({ artist }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-lg font-bold text-white text-start sm:text-center xl:text-center">{artist.name}</div>
-        <div className="text-white/80 text-start sm:text-center xl:text-center">{artist.followers?.total?.toLocaleString()} seguidores</div>
-        <div className="text-white/70 text-start sm:text-center xl:text-center">Popularidad: {artist.popularity}/100</div>
+        <div className="text-lg font-bold text-white text-center md:text-start xl:text-center">{artist.name}</div>
+        <div className="text-white/80 text-center md:text-start xl:text-center">{artist.followers?.total?.toLocaleString()} seguidores</div>
+        <div className="text-white/70 text-center md:text-start xl:text-center">Popularidad: {artist.popularity}/100</div>
         {artist.genres?.length > 0 && (
-          <div className="text-white/60 text-start sm:text-center xl:text-center">{artist.genres.join(", ")}</div>
+          <div className="text-white/60 text-center md:text-start xl:text-center">{artist.genres.join(", ")}</div>
         )}
       </div>
     </div>
