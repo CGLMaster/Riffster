@@ -2,7 +2,6 @@
 import Layout from "@/layouts/Layout.astro";
 import ClientPlaylistMain from "@/react/main/playlist/ClientPlaylistMain";
 import ClientAlbumMain from "@/react/main/album/ClientAlbumMain";
-import ClientArtistMain from "@/react/main/artist/ClientArtistMain";
 import ClientTopArtistMain from "@/react/main/artist/ClientTopArtistMain";
 ---
 
@@ -18,7 +17,6 @@ import ClientTopArtistMain from "@/react/main/artist/ClientTopArtistMain";
         >
             <div class="flex flex-wrap mt-6 gap-4">
                 <ClientPlaylistMain client:only="react" />
-                <ClientArtistMain client:only="react" />
                 <ClientAlbumMain client:only="react" />
                 <ClientTopArtistMain client:only="react" />
             </div>

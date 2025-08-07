@@ -40,7 +40,7 @@ export default function PlayerNoPremiumUI({ authToken }) {
                             : 0);
                         setPosition(state.progress_ms || 0);
                         setDuration(state.item?.duration_ms || 0);
-                        setVolume((state.device?.volume_percent || 50) / 100);
+                        setVolume((state.device?.volume_percent || 25) / 100);
                         setRepeatMode(state.repeat_state || "off");
                         setShuffleMode(state.shuffle_state || false);
                         setUseDevice(state.device || null);

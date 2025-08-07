@@ -3,7 +3,7 @@ function MainArtistCard({ artist }) {
 
     return (
         <a
-            href={`/artist/${id}`}
+            href={`/artists/${id}`}
             className="playlist-item flex flex-col w-44 relative p-2 overflow-hidden gap-2 rounded-md hover:bg-zinc-800 shadow-lg hover:shadow-xl bg-zinc-500/30 transition-all duration-300 items-center"
         >
             <div className="w-35 h-35 overflow-hidden rounded-full mb-2">

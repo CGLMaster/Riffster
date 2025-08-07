@@ -55,7 +55,7 @@ export default function PlayerUI({ authToken, spotifyClientId, spotifyClientSecr
                 setPosition(state.progress_ms || 0);
                 setDuration(state.item?.duration_ms || 0);
                 let apiVolume = state.device?.volume_percent;
-                if (typeof apiVolume !== "number" || isNaN(apiVolume)) apiVolume = 50;
+                if (typeof apiVolume !== "number" || isNaN(apiVolume)) apiVolume = 25;
                 const apiVolumeNormalized = apiVolume / 100;
                 if (optimisticVolume !== null) {
                     if (Math.abs(apiVolumeNormalized - optimisticVolume) < 0.01) {

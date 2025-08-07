@@ -9,7 +9,7 @@ function MainPlaylistCard({ playlist }) {
         >
             <div className="w-full aspect-square overflow-hidden rounded-md">
                 <img
-                    src={images[0].url}
+                    src={images[0] ? images[0].url : "/src/assets/img/riffter_logo.png"}
                     alt={name}
                     className="object-cover w-full h-full"
                 />
