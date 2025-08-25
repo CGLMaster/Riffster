@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ArtistTrackList from "./ArtistTrackList";
 import MainAlbumCard from "@/components/react/main/album/MainAlbumCard";
-import spotifyFetch from "@/components/react/fetcher/spotifyFetch";
+import { SpotifyService } from "@/services/spotify.service";
 
 export default function ClientArtistMain({ id }) {
   const [artist, setArtist] = useState(null);
@@ -17,13 +17,15 @@ export default function ClientArtistMain({ id }) {
     setError(null);
     async function fetchAll() {
       try {
-        const artistData = await spotifyFetch(`/artists/${id}`);
-        const topTracksData = await spotifyFetch(`/artists/${id}/top-tracks`, { market: "ES" });
-        const albumsData = await spotifyFetch(`/artists/${id}/albums`, { market: "ES", limit: 12 });
+        const [artistData, tracks, albums] = await Promise.all([
+          SpotifyService.getArtist(id),
+          SpotifyService.getArtistTopTracks(id),
+          SpotifyService.getArtistAlbums(id)
+        ]);
         if (!isMounted) return;
         setArtist(artistData);
-        setTracks(topTracksData.tracks || []);
-        setAlbums(albumsData.items || []);
+        setTracks(tracks);
+        setAlbums(albums);
       } catch (err) {
         setError("No se pudo cargar la información del artista.");
       } finally {

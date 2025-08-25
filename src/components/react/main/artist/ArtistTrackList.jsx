@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCurrentTrackId } from "@/hooks/useCurrentTrackId";
 import ModalPremiumAlert from "@/components/react/main/global/ModalPremiumAlert";
+import { SpotifyService } from "@/services/spotify.service";
 
 
 export default function ArtistTrackList({ tracks }) {
@@ -12,22 +13,11 @@ export default function ArtistTrackList({ tracks }) {
 
   const playTrack = async (trackId) => {
     try {
-      const response = await fetch("https://api.spotify.com/v1/me/player/play", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uris: [
-            `spotify:track:${trackId}`
-          ],
-          position_ms: 0,
-        }),
-      });
-      if (response.status === 403) setShowPremiumAlert(true);
+      await SpotifyService.playTrack(`spotify:track:${trackId}`);
     } catch (err) {
-      setShowPremiumAlert(true);
+      if (err.response?.status === 403) {
+        setShowPremiumAlert(true);
+      }
       console.error("Error al reproducir la canción:", err);
     }
   };

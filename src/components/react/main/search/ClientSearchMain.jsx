@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import load from 'lodash';
-import spotifyFetch from '@/components/react/fetcher/spotifyFetch';
+import { SpotifyService } from '@/services/spotify.service';
 import GridSection from '@/components/react/main/global/GridSection';
 import MainArtistCard from '@/components/react/main/artist/MainArtistCard';
 import MainPlaylistCard from '@/components/react/main/playlist/MainPlaylistCard';
@@ -33,12 +33,7 @@ function ClientSearchMain() {
         try {
             const spotifyClientId = import.meta.env.PUBLIC_SPOTIFY_CLIENT_ID;
             const spotifyClientSecret = import.meta.env.PUBLIC_SPOTIFY_CLIENT_SECRET;
-            const response = await spotifyFetch(
-                `/search`,
-                { q: query, type: 'track,artist,album,playlist', limit: 20 },
-                spotifyClientId,
-                spotifyClientSecret
-            );
+            const response = await SpotifyService.search(query, spotifyClientId, spotifyClientSecret);
             setSearchResults({
                 tracks: response.tracks?.items?.filter(Boolean) || [],
                 artists: response.artists?.items?.filter(Boolean) || [],

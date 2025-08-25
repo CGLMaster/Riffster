@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PlaylistList from "@/react/playlist/PlaylistList";
 import { refreshAccessToken } from "@/hooks/utils";
 import Loader from "@/react/playlist/Loader";
+import { SpotifyService } from "@/services/spotify.service";
 
 export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecret}) {
   const [playlist, setPlaylist] = useState(null);
@@ -18,26 +19,8 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
 
     const fetchAllTracks = async (url, accumulatedTracks = []) => {
       try {
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        });
-
-        if (response.status === 401) {
-          console.log("Refresh Token");
-          console.log(spotifyClientId)
-          const newAccessToken = await refreshAccessToken(spotifyClientId, spotifyClientSecret);
-          if (newAccessToken) {
-            return fetchData(url, newAccessToken);
-          } else {
-            setError("No se pudo obtener un nuevo token");
-            return;
-          }
-        }
-
-        const data = await response.json();
-
+        const data = await SpotifyService.getPlaylistTracks(url);
+        
         if (data.error) {
           setError(data.error.message);
           return;
@@ -54,16 +37,20 @@ export default function PlaylistDetails({id, spotifyClientId, spotifyClientSecre
           }, 2000);
         }
       } catch (err) {
+        if (err.status === 401) {
+          const newAccessToken = await refreshAccessToken(spotifyClientId, spotifyClientSecret);
+          if (newAccessToken) {
+            return fetchAllTracks(url, accumulatedTracks);
+          } else {
+            setError("No se pudo obtener un nuevo token");
+            return;
+          }
+        }
         setError("Error de red: " + err.message);
       }
     };
 
-    fetch(`https://api.spotify.com/v1/playlists/${id}`, {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    })
-      .then((res) => res.json())
+    SpotifyService.getPlaylist(id)
       .then((data) => {
         if (data.error) {
           setError(data.error.message);

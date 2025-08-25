@@ -6,6 +6,7 @@ import { refreshAccessToken } from '@/hooks/utils';
 import '@/styles/player/player.css';
 import PlayerUI from './PlayerUI/PlayerUI.jsx';
 import PlayerNoPremiumUI from './PlayerUI/PlayerNoPremiumUI.jsx';
+import { SpotifyService } from '@/services/spotify.service';
 
 export default function Player({ spotifyClientId, spotifyClientSecret }) {
     const [authToken, setAuthToken] = useState(null);
@@ -41,11 +42,9 @@ export default function Player({ spotifyClientId, spotifyClientSecret }) {
 
         async function checkPremium() {
             try {
-                const response = await fetch('https://api.spotify.com/v1/me', {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                const data = await response.json();
-                setIsPremium(data.product === 'premium');
+                const userData = await SpotifyService.getCurrentUser();
+                const isPremiumUser = userData?.product?.toLowerCase() === 'premium';
+                setIsPremium(isPremiumUser);
             } catch (err) {
                 console.error('Error verificando estado Premium:', err);
                 setIsPremium(false);

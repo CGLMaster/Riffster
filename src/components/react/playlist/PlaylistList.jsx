@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { FixedSizeList as List } from "react-window";
 import { useCurrentTrackId } from "@/hooks/useCurrentTrackId";
 import ModalPremiumAlert from "@/components/react/main/global/ModalPremiumAlert";
+import { SpotifyService } from "@/services/spotify.service";
 
 export default function PlaylistList({ allTracks, playlistId }) {
     const access_token = localStorage.getItem("access_token");
@@ -54,18 +55,7 @@ export default function PlaylistList({ allTracks, playlistId }) {
     const playTrackInContext = async (trackId) => {
         const offsetIndex = allTracks.findIndex((item) => item.track.id === trackId);
         try {
-            const response = await fetch("https://api.spotify.com/v1/me/player/play", {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    context_uri: `spotify:playlist:${playlistId}`,
-                    offset: { position: offsetIndex },
-                    position_ms: 0,
-                }),
-            });
+            const response = await SpotifyService.playPlaylistTrack(playlistId, offsetIndex);
             if (response.status === 403) {
                 setShowPremiumAlert(true);
             }
