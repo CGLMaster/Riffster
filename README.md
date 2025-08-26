@@ -1,7 +1,8 @@
 # 🎵 Riffster
 
-<img src="/src/assets/img/riffter_logo.png" alt="Riffster Logo" width="50%" style="display: block; margin: auto; max-width: 400px;">
-
+<p align="center">
+  <img src="/src/assets/img/riffter_logo.png" alt="Riffster Logo" width="400px">
+</p>
 
 Riffster es una aplicación web de música construida sobre la [API de Spotify para Desarrolladores](https://developer.spotify.com/documentation/web-api), que permite a los usuarios disfrutar de su música favorita con una interfaz moderna y fluida.
 
